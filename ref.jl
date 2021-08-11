@@ -53,8 +53,8 @@ T_w = 273.15 + 280 # Wandtemperaur in K
 Vo_Ar_fact = 4/d_react
 
 # Anpassungsfaktoren
-α_mem = 1e-1
-α_heat = 1e3
+α_mem = 1e-8
+α_heat = 1e4
 
 
 # Definiere die Startbedingungen des Gases

@@ -33,20 +33,18 @@ using DifferentialEquations
 
 function membran!(du, u, params, x)
   T, p = u[1], u[2:end]
-  #println(p)
-  k = 1
-  for i in p
-    if i < 0
-      p[k]= 0
-    end
-    k = k+1
-  end
   gas.TPX = T, sum(p), p/sum(p)
+  println(p/sum(p))
   rho = gas.density_mole
-  wdot = kinetik(T,p)
-  du[1]= ( -(dot(gas.partial_molar_enthalpies, (wdot .* ν)) .+ (U .* Vo_Ar_fact .* ( T - T_w ) .* α_heat  ) )./ # J/(s*m³)
-                  (rho .* gas.cp_mole) .* u_0) # J/(m³*K) --->  # Energiebilanz in K/m
-  du[2:end] .= ((((wdot .* ν) .* constants.R .* T .* 1000)./u_0) - ((p./T) .* du[1]))[1:end]
+  #wdot = kinetik(T,p)
+  wdot = 0
+  #m_mem = dgm_cantera() * Vo_Ar_fact * α_mem
+  
+  m_mem = zeros(size(p,1))
+  #println(p)
+  du[1]= ( -(dot(gas.partial_molar_enthalpies, ((wdot .* ν) - m_mem) .+ (U .* Vo_Ar_fact .* ( T - T_w ) .* α_heat  ) )./ # J/(s*m³)
+             (rho .* gas.cp_mole.* u_0)) ) # J/(m³*K) --->  # Energiebilanz in K/m
+  du[2:end] .= ( ((((wdot .* ν) - m_mem) .* constants.R .* T .* 1000)./u_0) - (p./(T .* du[1]) ) )[1:end]
 end
 
 
@@ -55,6 +53,6 @@ params = [α_mem, α_heat]
 xspan = (0, length)
 
 prob = ODEProblem(membran!, u0, xspan, params)
-
-sol = solve(prob, Tsit5())
+alg =Rodas4P()
+sol = solve(prob, alg)
 plot(sol, vars = [1]) 
