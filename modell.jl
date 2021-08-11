@@ -5,12 +5,13 @@ Start einer Umschreibung meiner Membranmodellierung mit Julia, wobei die Stoffwe
 using PyCall
 using Conda
 using Plots
-using RecursiveArrayTools, DiffEqBase, OrdinaryDiffEq
+using DiffEqBase, OrdinaryDiffEq
 using LinearAlgebra
 
 # Importieren der python Pakete
 constants = pyimport("scipy.constants")
 ct = pyimport("cantera")
+np = pyimport("numpy")
 
 # Hinzufügen der neuen Stoffdatenbank
 ct.add_directory("/home/matthiskurth/Dokumente/Programmieren/python/Cantera/membran-reaktor/cantera/data")
@@ -27,32 +28,28 @@ include("funktionen.jl")
 ### Ab hier Beschreibung der Membran
 # Die variablen Stoffwerte werden direkt in der Funktion aufgerufen
 
-using ModelingToolkit, DifferentialEquations, Symbolics
+using DifferentialEquations
 
 # define the problem
-# p(x) ist der Vektor der Partialdrücke
-# T ist die Temperatur an jeder Stelle
 
-function membranreaktor(du, u, params, x)
-  T = u.x[1]
-  
-  wdot = kinetik()
-  α_mem, α_heat = params
-  du.x[1] .= 0
-  du.x[2] .= ones(size(u.x[2]))
-  #((wdot) * constants.R * gas.T * 1000)/ (u_0)  - (u.x[2]/ gas.T * du.x[1])
-  nothing
+function membran!(du, u, params, x)
+  T, p = u[1], u[2:end]
+  println(T)
+  gas.TPX = T, sum(p), p/sum(p)
+  rho = gas.density_mole
+  wdot = kinetik(T,p)
+  du[1]= ( -(dot(gas.partial_molar_enthalpies, (wdot .* ν)) .+ (U .* Vo_Ar_fact .* ( T - T_w ) .* α_heat  ) )./ # J/(s*m³)
+                  (rho .* gas.cp_mole) .* u_0) # J/(m³*K) --->  # Energiebilanz in K/m
+  du[2:end] .= ((((wdot .* ν) .* constants.R .* T .* 1000)./u_0) - ((p./T) .* du[1]))[1:end]
 end
 
 
-u0 = ArrayPartition(T_0, gas.X)
+u0 =vcat(T_0, gas.X*gas.P) 
+
 params = [α_mem, α_heat]
 xspan = (0, length)
 
-problem = ODEProblem(membranreaktor, u0, xspan, params)
-# für später
-#D(p) ~ ((kinetik()- dgm_cantera() * Vo_Ar_fact * α_mem) * constants.R * gas.T * 1000)/ (u_0)  - (p(x)/ gas.T * D(x) )
+prob = ODEProblem(membran!, u0, xspan, params)
 
-soltn = solve(problem, Rosenbrock23())
-plot(soltn)
-
+sol = solve(prob, Tsit5())
+plot(sol) 

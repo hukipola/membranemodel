@@ -1,4 +1,4 @@
-function kinetik()
+function kinetik(T,p_i)
 
     # Methanisierung von CO2 Kinetik nach
     # Schlereth, David; Hinrichsen, Olaf (2014): A fixed-bed reactor modeling study on the methanation of CO2. In: Chemical Engineering Research and Design     92 (4), S. 702–712. DOI: 10.1016/j.cherd.2013.11.014.
@@ -9,15 +9,15 @@ function kinetik()
         Eine sehr einfache Darstellung der Methanisierung, die über einen einfachen Ansatz nach Koschany
         Eine Erweiterung wäre die Verwendung von Xu et al für die anderen komponenten.
         Gibt die Reaktionsrate zurück in (kmol/m³-s) """
-
-
+        
         rho_kat = 1475              # Dichte des Katalysators in kg/m3. Lässt sich aber auch anders berechnen
         # Wirkungsgrad des Katalysators
-        nu_cat = 0.1
+        nu_cat = 0.02
 
-        temp = gas.T # Temperatur in K
-        p_tot = gas.P # Druck in Pa
-
+        # temp = gas.T # Temperatur in K
+        temp = T # Temperatur in K
+        #p_tot = gas.P # Druck in Pa
+        p_tot = sum(p_i) # Druck in Pa
         mole_dict = Dict(zip( gas.species_names , gas.X )) # Molenbruch der einzelnen Komponenten als dict
         # Die Partialdrücke der einzelnen komponenten
         pH2 = get(mole_dict, "H2", 0) * p_tot/1e5 #[Pa -> bar]
@@ -60,7 +60,8 @@ function kinetik()
 
         # Verwendung von Katalysator void fraction mit u_s (z,t)= ε_bed∙u_(g,real) (z,t), da die Geschwindigkeit dadurch eine andere ist.
 
-        return r*nu_cat*(1-epsilon_bed)
+        # return r*nu_cat*(1-epsilon_bed)
+        return r_I*nu_cat*(1-epsilon_bed)
 end
 
 function dgm_cantera()
