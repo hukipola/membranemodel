@@ -12,7 +12,7 @@ function kinetik(T,p_i)
         
         rho_kat = 1475              # Dichte des Katalysators in kg/m3. Lässt sich aber auch anders berechnen
         # Wirkungsgrad des Katalysators
-        nu_cat = 0.02
+        nu_cat = 0.05
 
         # temp = gas.T # Temperatur in K
         temp = T # Temperatur in K

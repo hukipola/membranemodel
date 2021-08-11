@@ -24,7 +24,6 @@ include("ref.jl")
 # Dann die Funktionen laden
 include("funktionen.jl")
 
-
 ### Ab hier Beschreibung der Membran
 # Die variablen Stoffwerte werden direkt in der Funktion aufgerufen
 
@@ -34,7 +33,14 @@ using DifferentialEquations
 
 function membran!(du, u, params, x)
   T, p = u[1], u[2:end]
-  println(T)
+  #println(p)
+  k = 1
+  for i in p
+    if i < 0
+      p[k]= 0
+    end
+    k = k+1
+  end
   gas.TPX = T, sum(p), p/sum(p)
   rho = gas.density_mole
   wdot = kinetik(T,p)
@@ -45,11 +51,10 @@ end
 
 
 u0 =vcat(T_0, gas.X*gas.P) 
-
 params = [α_mem, α_heat]
 xspan = (0, length)
 
 prob = ODEProblem(membran!, u0, xspan, params)
 
 sol = solve(prob, Tsit5())
-plot(sol) 
+plot(sol, vars = [1]) 

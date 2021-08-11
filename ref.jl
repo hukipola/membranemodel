@@ -3,11 +3,11 @@ T_ref  = 298.15
 p_ref = ct.one_atm
 
 # Startbedingungen
-T_0 = 320 + 273.15
+T_0 = 280 + 273.15
 
 # Zusammensetzung
-komponenten = ["CO2" "H2"]
-zusammensetzung = [1 4]
+komponenten = ["CO2" "H2" "CH4"]
+zusammensetzung = [1 4 2]
 # Stöchiometrische Faktoren der Reaktion
 ν = [1 0 0 -1 -4 2]'
 comp_0 = Dict(zip(komponenten, zusammensetzung ))
@@ -17,9 +17,9 @@ P_ini = 10 * ct.one_atm
 
 # Andere Eigenschaften des Reaktors
 ## Reaktor
-length =  0.5 # *approximate* PFR length [m]
+length =  0.9 # *approximate* PFR length [m]
 # u_0 = 5e-2  # inflow velocity [m/s]
-GHVS = 9000 # Bei Standardbedingungen T_ref und p_ref
+GHVS = 5000 # Bei Standardbedingungen T_ref und p_ref
 # todo: u_0 im funktionsaufruf selber berechnen, da es sich ändert
 
 d_react = 15-3 # Reaktordurchmesser in m
@@ -49,12 +49,12 @@ Reaktor
 
 # Wärmeübertragung
 U = 500 # W/m²-K
-T_w = 273.15 + 300 # Wandtemperaur in K
+T_w = 273.15 + 280 # Wandtemperaur in K
 Vo_Ar_fact = 4/d_react
 
 # Anpassungsfaktoren
 α_mem = 1e-1
-α_heat = 1
+α_heat = 1e3
 
 
 # Definiere die Startbedingungen des Gases
