@@ -7,7 +7,6 @@ using Conda
 using Plots
 using DiffEqBase, OrdinaryDiffEq
 using LinearAlgebra
-
 # Importieren der python Pakete
 constants = pyimport("scipy.constants")
 ct = pyimport("cantera")
@@ -24,36 +23,35 @@ include("ref.jl")
 # Dann die Funktionen laden
 include("funktionen.jl")
 
-### Ab hier Beschreibung der Membran
+              ### Ab hier Beschreibung der Membran
 # Die variablen Stoffwerte werden direkt in der Funktion aufgerufen
 
 using DifferentialEquations
 
 # define the problem
 
-function membran!(du, u, params, x)
-  T, p = u[1], u[2:end]
-  #println(T)
-  for i in 1:1:size(gas.X,1)
-    if p[i] < 0
-      
-    end
-  end
-  gas.TPX = T, sum(p), p/sum(p)
+
+function membran_faria!(du, u, params, x)
+  leng = size(gas.X,1)
+  T, dTdx, p_ges, c_u0 = u[1],u[2], u[3], u[4:end]
+  wdot = kinetik(T, p_ges) 
+  gas.TP = T, p_ges 
+  println(T)
+  gas.concentrations = c_u0/(u_0 * 1000)
   rho = gas.density_mole
-  wdot = kinetik(T,p)
-  du[1]= ( -(dot(gas.partial_molar_enthalpies, (wdot .* ν)) .+ (U .* Vo_Ar_fact .* ( T - T_w ) .* α_heat  ) )./ # J/(s*m³)
-                  (rho .* gas.cp_mole) .* u_0) # J/(m³*K) --->  # Energiebilanz in K/m
-  du[2:end] .= ((((wdot .* ν) .* constants.R .* T .* 1000)./u_0) - ((p./T) .* du[1]))[1:end]
+  du[1] = dTdx  
+  #du[2] = 0
+  du[2] = (u_0 * rho * gas.cp_mass * length/λ_ax) * dTdx - (ρ_bed * length^2/λ_ax) *(-ΔH_R) - ((π*d_react * length^2/λ_ax) .* U .* ( T - T_w ) .* α_heat  )  
+  du[3] = 0
+  #du[4:end] .= 0
+  du[4:end] .=  -1 * length * ν .* wdot 
 end
 
 
-u0 =vcat(T_0, gas.X*gas.P) 
-println(gas.X)
+u0 = vcat(T_0, 1, gas.P, gas.concentrations*1e3.*u_0) 
 params = [α_mem, α_heat]
 xspan = (0, length)
 
-prob = ODEProblem(membran!, u0, xspan, params)
-
-sol = solve(prob, Tsit5())
-plot(sol, vars = 1) 
+prob = ODEProblem(membran_faria!, u0, xspan, params)
+sol = solve(prob)
+plot(sol, vars = 1)

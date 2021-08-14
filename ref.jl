@@ -9,31 +9,32 @@ T_0 = 280 + 273.15
 komponenten = ["CO2" "H2" "CH4"]
 zusammensetzung = [1 4 2]
 # Stöchiometrische Faktoren der Reaktion
-ν = [1 0 0 -1 -4 2]'
+ν = [1, 0, 0, -1, -4, 2]
 comp_0 = Dict(zip(komponenten, zusammensetzung ))
 
 P_ini = 10 * ct.one_atm
 
-
+λ_ax = 1.403 # W/m2 *K
 # Andere Eigenschaften des Reaktors
 ## Reaktor
-length =  0.9 # *approximate* PFR length [m]
+length =  0.4 # *approximate* PFR length [m]
 # u_0 = 5e-2  # inflow velocity [m/s]
-GHVS = 5000 # Bei Standardbedingungen T_ref und p_ref
+GHVS = 1000 # Bei Standardbedingungen T_ref und p_ref
 # todo: u_0 im funktionsaufruf selber berechnen, da es sich ändert
 
 d_react = 15-3 # Reaktordurchmesser in m
-area = pi * (d_react/2)^2  # cross-sectional area [m**2]
-volume = area * length
+A_r = π * (d_react/2)^2  # cross-sectional area [m**2]
+volume = A_r * length
 # Berechnung der Leerrohr-Geschwindigkeit bei Prozessbedingungen durch Verwendung des id. Gasgesetzes aus der GHVS
-u_0 = GHVS * (T_0/T_ref * p_ref/P_ini) * volume /(area*3600) # 1/h * m³ * h/(m²*s) = m/s
+u_0 = GHVS * (T_0/T_ref * p_ref/P_ini) * volume /(A_r*3600) # 1/h * m³ * h/(m²*s) = m/s
 
-mass_flow_rate = u_0 * gas.density * area # m/s * kg/m³ * m² = kg/s
-volume_flow_rate = u_0 * area *60/(1000) # m/s * m² = m³/s = L/min
+mass_flow_rate = u_0 * gas.density * A_r # m/s * kg/m³ * m² = kg/s
+volume_flow_rate = u_0 * A_r *60/(1000) # m/s * m² = m³/s = L/min
 
-epsilon_bed = 0.39          # Porosität des Bettes des Reaktors/void fraction
+ε_bed = 0.39          # Porosität des Bettes des Reaktors/void fraction
 
-
+ρ_bed =  1475 
+ΔH_R = 165e3 # J/mol
 #=
 Membran
 =#
@@ -48,7 +49,7 @@ Reaktor
 =#
 
 # Wärmeübertragung
-U = 500 # W/m²-K
+U = 20 # W/m²-K
 T_w = 273.15 + 280 # Wandtemperaur in K
 Vo_Ar_fact = 4/d_react
 

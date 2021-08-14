@@ -1,4 +1,4 @@
-function kinetik(T,p_i)
+function kinetik(T,p_tot)
 
     # Methanisierung von CO2 Kinetik nach
     # Schlereth, David; Hinrichsen, Olaf (2014): A fixed-bed reactor modeling study on the methanation of CO2. In: Chemical Engineering Research and Design     92 (4), S. 702–712. DOI: 10.1016/j.cherd.2013.11.014.
@@ -10,14 +10,14 @@ function kinetik(T,p_i)
         Eine Erweiterung wäre die Verwendung von Xu et al für die anderen komponenten.
         Gibt die Reaktionsrate zurück in (kmol/m³-s) """
         
-        rho_kat = 1475              # Dichte des Katalysators in kg/m3. Lässt sich aber auch anders berechnen
+        rho_kat = ρ_bed              # Dichte des Katalysators in kg/m3. Lässt sich aber auch anders berechnen
         # Wirkungsgrad des Katalysators
-        nu_cat = 0.001
+        nu_cat = 0.01
 
         # temp = gas.T # Temperatur in K
         temp = T # Temperatur in K
-        #p_tot = gas.P # Druck in Pa
-        p_tot = sum(p_i) # Druck in Pa
+        # p_tot = gas.P # Druck in Pa
+        # p_tot =  p # Druck in Pa
         mole_dict = Dict(zip( gas.species_names , gas.X )) # Molenbruch der einzelnen Komponenten als dict
         # Die Partialdrücke der einzelnen komponenten
         pH2 = get(mole_dict, "H2", 0) * p_tot/1e5 #[Pa -> bar]
@@ -36,7 +36,7 @@ function kinetik(T,p_i)
     # Umwandlung der Gleichgewichtslage in K_p zu K_x über die Umwandlung in Molenbrüche
         # K_uhl = 1/(K1 * K2)/((p_tot)^(-2))
 
-        # # Reaktionsgeschwindigkeitskonstante
+          # # Reaktionsgeschwindigkeitskonstante
         k =  10^3 * 3.46e-4 * exp(77.5e3/constants.R * (1/Tref-1/gas.T))  #[mol/(bar*kg_cat*s)] -> inkl Umrechnung von g in kg_cat -> Vorfaktor 10**3
 
         # # Adsorptionskonstanten
@@ -60,8 +60,8 @@ function kinetik(T,p_i)
 
         # Verwendung von Katalysator void fraction mit u_s (z,t)= ε_bed∙u_(g,real) (z,t), da die Geschwindigkeit dadurch eine andere ist.
 
-        # return r*nu_cat*(1-epsilon_bed)
-        return r_I*nu_cat*(1-epsilon_bed)
+        # return r*nu_cat*(1-ε_bed)
+        return r_I*nu_cat*(1-ε_bed)
 end
 
 function dgm_cantera()
