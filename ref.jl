@@ -7,19 +7,19 @@ T_0 = 280 + 273.15
 
 # Zusammensetzung
 komponenten = ["CO2" "H2" "CH4"]
-zusammensetzung = [1 4 2]
+zusammensetzung = [1 4 3]
 # Stöchiometrische Faktoren der Reaktion
 ν = [1, 0, 0, -1, -4, 2]
 comp_0 = Dict(zip(komponenten, zusammensetzung ))
 
-P_ini = 10 * ct.one_atm
+P_ini = 25 * ct.one_atm
 
-λ_ax = 1.403 # W/m2 *K
+λ_ax = 1.403 # W/m *K
 # Andere Eigenschaften des Reaktors
 ## Reaktor
 length =  0.4 # *approximate* PFR length [m]
 # u_0 = 5e-2  # inflow velocity [m/s]
-GHVS = 1000 # Bei Standardbedingungen T_ref und p_ref
+GHVS = 100 # Bei Standardbedingungen T_ref und p_ref
 # todo: u_0 im funktionsaufruf selber berechnen, da es sich ändert
 
 d_react = 15-3 # Reaktordurchmesser in m
@@ -33,8 +33,8 @@ volume_flow_rate = u_0 * A_r *60/(1000) # m/s * m² = m³/s = L/min
 
 ε_bed = 0.39          # Porosität des Bettes des Reaktors/void fraction
 
-ρ_bed =  1475 
-ΔH_R = 165e3 # J/mol
+ρ_bed =  1475  #kg/m3
+ΔH_R = -165 # J/mol
 #=
 Membran
 =#
@@ -49,13 +49,13 @@ Reaktor
 =#
 
 # Wärmeübertragung
-U = 20 # W/m²-K
+U = 35 # W/m²-K
 T_w = 273.15 + 280 # Wandtemperaur in K
 Vo_Ar_fact = 4/d_react
 
 # Anpassungsfaktoren
-α_mem = 1e-8
-α_heat = 1e4
+α_mem = 1
+α_heat = 1
 
 
 # Definiere die Startbedingungen des Gases
